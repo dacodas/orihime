@@ -28,6 +28,15 @@ class Word(models.Model):
     reading = models.CharField(max_length=1024)
     definition = models.ForeignKey(Text,
                                    on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+
+    constraints = [
+        models.constraints.UniqueConstraint(
+            fields=['reading', 'definition', 'user'],
+            name='unique_reading_and_definition_per_user'
+           )
+        ]
 
 class WordRelation(models.Model):
 

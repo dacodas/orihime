@@ -17,13 +17,21 @@ from django.contrib import admin
 from django.contrib.auth import authenticate, login;
 from django.urls import path
 
-from orihime.views import login_view, SourceViewSet, search, TextViewSet
+from orihime.views import \
+    SourceViewSet, \
+    TextViewSet, \
+    WordRelationViewSet, \
+    WordViewSet, \
+    login_view, \
+    search
+ 
 
 from rest_framework import routers
 
 router = routers.SimpleRouter()
 router.register(r'texts', TextViewSet)
-# router.register(r'words', WordViewSet)
+router.register(r'word-relations', WordRelationViewSet)
+router.register(r'words', WordViewSet)
 router.register(r'sources', SourceViewSet)
 
 urlpatterns = [

@@ -4,7 +4,9 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from rest_framework import viewsets, generics, permissions, decorators
 
-from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer, SourceSerializer
+import rest_framework
+
+from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer, SourceSerializer, WordRelationSerializer, WordSerializer
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
 
@@ -79,21 +81,66 @@ class TextViewSet(UseCurrentUserMixin,
 
     queryset = Text.objects.all()
 
-class WordRelationList(UseCurrentUserMixin,
-                       viewsets.ModelViewSet):
+# class WordViewSet(UseCurrentUserMixin,
+#                   viewsets.mixins.CreateModelMixin,
+#                   viewsets.mixins.UpdateModelMixin,
+#                   viewsets.mixins.DestroyModelMixin,
+#                   viewsets.GenericViewSet):
 
-    serializer_class = TextSerializer
+#     # Same as ModelViewSet, but for retrieve and list serialize in a
+#     # pretty way
+
+#     serializer_class = WordSerializer
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+#                           IsOwnerOrReadOnly]
+
+#     queryset = Word.objects.all()
+
+#     def _get_pretty_serializer(self, *args, **kwargs):
+
+#         serializer_class = WordSerializerPretty
+#         kwargs['context'] = self.get_serializer_context()
+#         return serializer_class(*args, **kwargs)
+
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.filter_queryset(self.get_queryset())
+
+#         page = self.paginate_queryset(queryset)
+#         if page is not None:
+#             serializer = self._get_pretty_serializer(page, many=True)
+#             return self.get_paginated_response(serializer.data)
+
+#         serializer = self._get_pretty_serializer(queryset, many=True)
+#         return rest_framework.response.Response(serializer.data)
+
+#     def retrieve(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = self._get_pretty_serializer(instance)
+#         return rest_framework.response.Response(serializer.data)
+
+class WordViewSet(UseCurrentUserMixin,
+                  viewsets.ModelViewSet):
+
+    serializer_class = WordSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
+    queryset = Word.objects.all()
+
+class WordRelationViewSet(UseCurrentUserMixin,
+                          viewsets.ModelViewSet):
+
+    serializer_class = WordRelationSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly]
 
-    queryset = Text.objects.all()
+    queryset = WordRelation.objects.all()
 
 class SourceViewSet(viewsets.ModelViewSet):
 
+    serializer_class = SourceSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     queryset = Source.objects.all()
-    serializer_class = SourceSerializer
 
 # https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
 
