@@ -81,43 +81,6 @@ class TextViewSet(UseCurrentUserMixin,
 
     queryset = Text.objects.all()
 
-# class WordViewSet(UseCurrentUserMixin,
-#                   viewsets.mixins.CreateModelMixin,
-#                   viewsets.mixins.UpdateModelMixin,
-#                   viewsets.mixins.DestroyModelMixin,
-#                   viewsets.GenericViewSet):
-
-#     # Same as ModelViewSet, but for retrieve and list serialize in a
-#     # pretty way
-
-#     serializer_class = WordSerializer
-#     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-#                           IsOwnerOrReadOnly]
-
-#     queryset = Word.objects.all()
-
-#     def _get_pretty_serializer(self, *args, **kwargs):
-
-#         serializer_class = WordSerializerPretty
-#         kwargs['context'] = self.get_serializer_context()
-#         return serializer_class(*args, **kwargs)
-
-#     def list(self, request, *args, **kwargs):
-#         queryset = self.filter_queryset(self.get_queryset())
-
-#         page = self.paginate_queryset(queryset)
-#         if page is not None:
-#             serializer = self._get_pretty_serializer(page, many=True)
-#             return self.get_paginated_response(serializer.data)
-
-#         serializer = self._get_pretty_serializer(queryset, many=True)
-#         return rest_framework.response.Response(serializer.data)
-
-#     def retrieve(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         serializer = self._get_pretty_serializer(instance)
-#         return rest_framework.response.Response(serializer.data)
-
 class WordViewSet(UseCurrentUserMixin,
                   viewsets.ModelViewSet):
 
@@ -143,11 +106,3 @@ class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all()
 
 # https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
-
-# class WordRelationList(generics.ListCreateAPIView):
-
-#     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-#                           IsOwnerOrReadOnly]
-
-#     queryset = WordRelation.objects.all()
-#     serializer_class = WordRelationSerializer

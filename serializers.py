@@ -52,20 +52,6 @@ class TextSerializer(serializers.ModelSerializer):
         model = Text
         fields = ['contents', 'source', 'user']
 
-# class WordSerializerPretty(serializers.ModelSerializer):
-
-#     definition = serializers.SlugRelatedField(many=False,
-#                                               read_only=True,
-#                                               slug_field='contents')
-#     user = serializers.SlugRelatedField(many=False,
-#                                         read_only=False,
-#                                         queryset=User.objects.all(),
-#                                         slug_field='email')
-
-#     class Meta:
-#         model = Word
-#         fields = ['reading', 'definition', 'user']
-
 class WordSerializer(serializers.ModelSerializer):
 
     definition = serializers.SlugRelatedField(many=False,
