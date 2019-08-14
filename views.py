@@ -4,13 +4,14 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from rest_framework import viewsets, generics, permissions, decorators
 
-import rest_framework
-
 from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer, SourceSerializer, WordRelationSerializer, WordSerializer
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
 
 import requests
+import django
+import json
+import rest_framework
 
 def login_view(request):
     username = request.POST['username']
@@ -22,20 +23,6 @@ def login_view(request):
     else:
         return HttpResponse("<html><body>You're a piece of shit...</body></html>")
 
-def add_text():
-
-    pass
-
-def show_text():
-
-    pass
-
-def add_child_word_to_text():
-
-    pass
-
-import django
-import json
 @django.views.decorators.csrf.csrf_exempt
 def search(request):
 

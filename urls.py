@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.contrib.auth import authenticate, login;
-from django.urls import path
+from django.urls import path, include
 
 from orihime.views import \
     SourceViewSet, \
@@ -24,7 +24,6 @@ from orihime.views import \
     WordViewSet, \
     login_view, \
     search
- 
 
 from rest_framework import routers
 
@@ -38,4 +37,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login_view, name='login'),
     path('search/', search, name="sources"),
-] + router.urls
+    path('api/', include(router.urls))
+]
