@@ -31,6 +31,13 @@ class Word(models.Model):
 
 class WordRelation(models.Model):
 
+    constraints = [
+        models.constraints.UniqueConstraint(
+            fields=['text', 'word'],
+            name='unique_word_per_text'
+           )
+        ]
+
     text = models.ForeignKey(Text,
                              on_delete=models.CASCADE)
     word = models.ForeignKey(Word,

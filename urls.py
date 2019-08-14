@@ -17,16 +17,17 @@ from django.contrib import admin
 from django.contrib.auth import authenticate, login;
 from django.urls import path
 
-from orihime.views import login_view, SourceList, search, TextViewSet
+from orihime.views import login_view, SourceViewSet, search, TextViewSet
 
 from rest_framework import routers
 
 router = routers.SimpleRouter()
 router.register(r'texts', TextViewSet)
+# router.register(r'words', WordViewSet)
+router.register(r'sources', SourceViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login_view, name='login'),
-    path('sources/', SourceList.as_view(), name="sources"),
     path('search/', search, name="sources"),
 ] + router.urls

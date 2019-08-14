@@ -56,14 +56,11 @@ def search(request):
         
         return HttpResponse(content=response.content, content_type='text/plain', status=200)
 
-class TextViewSet(viewsets.ModelViewSet):
+class UseCurrentUserMixin():
 
-    serializer_class = TextSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly]
-
-    queryset = Text.objects.all()
-
+    # Or restrict by this... Or can that just be handled with permissions_clases?
+    # def get_queryset(self):
+    #     return self.request.user.accounts.all()
     def create(self, request, *args, **kwargs):
 
         import collections
@@ -71,23 +68,34 @@ class TextViewSet(viewsets.ModelViewSet):
         newQueryDict['user'] = request.user.email
         fauxRequest = collections.namedtuple('Request', 'data')(newQueryDict)
 
-        # import pdb; pdb.set_trace()
+        return super(UseCurrentUserMixin, self).create(fauxRequest, *args, **kwargs)
 
-        return super(TextViewSet, self).create(fauxRequest, *args, **kwargs)
+class TextViewSet(UseCurrentUserMixin,
+                  viewsets.ModelViewSet):
 
-    # Or restrict by this... Or can that just be handled with permissions_clases?
-    # def get_queryset(self):
-    #     return self.request.user.accounts.all()
-    
+    serializer_class = TextSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
 
-# https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
+    queryset = Text.objects.all()
 
-class SourceList(generics.ListCreateAPIView):
+class WordRelationList(UseCurrentUserMixin,
+                       viewsets.ModelViewSet):
+
+    serializer_class = TextSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
+
+    queryset = Text.objects.all()
+
+class SourceViewSet(viewsets.ModelViewSet):
 
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
+
+# https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
 
 # class WordRelationList(generics.ListCreateAPIView):
 
