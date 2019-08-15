@@ -4,9 +4,11 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from rest_framework import viewsets, generics, permissions, decorators
 
-from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer, SourceSerializer, WordRelationSerializer, WordSerializer
+from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer, SourceSerializer, WordRelationSerializer, WordSerializer, _WordRelationSerializer
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
+
+from lxml import etree
 
 import requests
 import django
@@ -23,15 +25,26 @@ def login_view(request):
     else:
         return HttpResponse("<html><body>You're a piece of shit...</body></html>")
 
+def search_larousse(word):
+    
+    response = requests.get(
+        "https://larousse.fr/dictionnaires/francais/{}"
+        .format(word))
+
+    root = etree.HTML(response.content)
+
+    return HttpResponse(content = 
+                        etree.tostring(root.xpath("//ul[@class='Definitions']")[0], method='text', encoding='utf-8').decode('utf-8'))
+
+
 @django.views.decorators.csrf.csrf_exempt
-def search(request):
+def search(request, **kwargs):
+
+    return search_larousse(kwargs['word'])
 
     ORIHIME_SEARCH = object()
     ORIHIME_SEARCH_URI = "http://localhost:8081/search"
     # 45.79.93.109
-
-    print(request.POST)
-    print(request.content_params)
 
     params = {x: request.POST[x] for x in ['backend', 'reading']}
 
@@ -85,6 +98,15 @@ class WordRelationViewSet(viewsets.ModelViewSet):
 
     queryset = WordRelation.objects.all()
 
+# Find out permissions, make sure users can only add relations between
+# words and texts that they own
+class _WordRelationViewSet(viewsets.ModelViewSet):
+
+    serializer_class = _WordRelationSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    queryset = WordRelation.objects.all()
+
 class SourceViewSet(viewsets.ModelViewSet):
 
     serializer_class = SourceSerializer
@@ -97,7 +119,7 @@ class SourceViewSet(viewsets.ModelViewSet):
 
 from django.db import connection
 
-def TextTreeView(text_id):
+def _TextTreeView(request, **kwargs):
 
     # Instead of doing this, package the application, and use
     # distutils or setup packaging and source finding utilities
@@ -110,7 +132,7 @@ def TextTreeView(text_id):
         query = f.read()
 
     with connection.cursor() as cursor:
-        cursor.execute(query, [text_id])
+        cursor.execute(query, [kwargs['id']])
         results = cursor.fetchall()
 
     trees = dict()
@@ -128,10 +150,12 @@ def TextTreeView(text_id):
 
         trees[tree['id']] = tree
 
+    print(trees)
+
     import xml.etree.ElementTree as ET
 
-    root = ET.Element('div')
-    ET.SubElement(root, 'p').text = trees[1]['contents']
+    root = ET.Element('div', {'id': 'orihime-text'})
+    ET.SubElement(root, 'div', {'id': str(kwargs['id'])}).text = trees[kwargs['id']]['contents']
 
     def addChildren(root, tree):
 
@@ -139,12 +163,26 @@ def TextTreeView(text_id):
 
         for child in tree['children']:
 
-            item = ET.SubElement(mylist, 'li')
-            item.text = child['reading']
-            new_root = ET.SubElement(item, 'div')
+            item = ET.SubElement(mylist, 'li', {'class': 'orihime-word'})
+            ET.SubElement(item, 'div', {'class': 'reading'}).text = child['reading']
+            new_root = ET.SubElement(item, 'div', {'class': 'definition', 'id': str(child['id'])})
             ET.SubElement(new_root, 'p').text = child['contents']
             addChildren(new_root, child)
 
-    addChildren(root, trees[1])
+    addChildren(root, trees[kwargs['id']])
+    # HTMLDocument = ET.ElementTree(root)
+    string = ET.tostring(root).decode('utf-8')
 
-    return ET.ElementTree(root)
+    return HttpResponse(string)
+
+def TextTreeView(request, **kwargs):
+
+    import django.template
+    template = django.template.loader.get_template('text-tree.html')
+
+    import django.shortcuts
+
+    response = _TextTreeView(None, **kwargs).content.decode('utf-8')
+
+    return django.shortcuts.render(request, 'text-tree.html', {"ANKI_Text": response, "toggle_snippet": ""})
+

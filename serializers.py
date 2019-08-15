@@ -15,6 +15,22 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ['url', 'name']
 
+# Same as below, but specify text with an ID
+class _WordRelationSerializer(serializers.ModelSerializer):
+
+    text = serializers.PrimaryKeyRelatedField(many=False,
+                                              read_only=False,
+                                              queryset=Text.objects.all())
+    word = serializers.SlugRelatedField(many=False,
+                                        read_only=False,
+                                        queryset=Word.objects.all(),
+                                        slug_field='reading')
+
+    class Meta:
+
+        model = WordRelation
+        fields = ['text', 'word', 'begin', 'end']
+
 class WordRelationSerializer(serializers.ModelSerializer):
 
     text = serializers.SlugRelatedField(many=False,

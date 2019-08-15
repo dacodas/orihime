@@ -21,21 +21,32 @@ from orihime.views import \
     SourceViewSet, \
     TextViewSet, \
     WordRelationViewSet, \
+    _WordRelationViewSet, \
     WordViewSet, \
     login_view, \
     search
 
 from rest_framework import routers
 
+import django.conf.urls.static
+from django.conf import settings
+
+import orihime
+
 router = routers.SimpleRouter()
 router.register(r'texts', TextViewSet)
 router.register(r'word-relations', WordRelationViewSet)
+router.register(r'_word-relations', _WordRelationViewSet)
 router.register(r'words', WordViewSet)
 router.register(r'sources', SourceViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login_view, name='login'),
-    path('search/', search, name="sources"),
-    path('api/', include(router.urls))
-]
+    path('search/<str:word>', search, name="sources"),
+    path('api/', include(router.urls)),
+    path('text-tree/<int:id>', orihime.views.TextTreeView, name="text-tree"),
+    path('_text-tree/<int:id>', orihime.views._TextTreeView, name="text-tree")
+] \
++ django.conf.urls.static.static(settings.STATIC_URL, document_root = settings.STATIC_ROOT) \
++ router.urls

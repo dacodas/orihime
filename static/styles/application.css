@@ -1,0 +1,11 @@
+div.definition
+{
+    white-space: pre-wrap
+}
+
+body
+{
+    margin: 0 auto;
+    max-width: 900px;
+    font-size: 1.25em;
+}
