@@ -76,12 +76,12 @@ class WordViewSet(UseCurrentUserMixin,
                           IsOwnerOrReadOnly]
     queryset = Word.objects.all()
 
-class WordRelationViewSet(UseCurrentUserMixin,
-                          viewsets.ModelViewSet):
+# Find out permissions, make sure users can only add relations between
+# words and texts that they own
+class WordRelationViewSet(viewsets.ModelViewSet):
 
     serializer_class = WordRelationSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     queryset = WordRelation.objects.all()
 
@@ -93,3 +93,58 @@ class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all()
 
 # https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
+
+
+from django.db import connection
+
+def TextTreeView(text_id):
+
+    # Instead of doing this, package the application, and use
+    # distutils or setup packaging and source finding utilities
+    import os
+    sql_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "word-in-context.sql")
+
+    with open(sql_file_path, "r") as f:
+
+        query = f.read()
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [text_id])
+        results = cursor.fetchall()
+
+    trees = dict()
+
+    for result in results:
+        keys = ('id', 'parent_id', 'reading', 'begin', 'end', 'contents')
+
+        tree = {key: value for (key, value) in zip(keys, result)}
+        tree['children'] = []
+
+        parent_id = tree['parent_id']
+        if parent_id is not None:
+
+            trees[tree['parent_id']]['children'].append(tree)
+
+        trees[tree['id']] = tree
+
+    import xml.etree.ElementTree as ET
+
+    root = ET.Element('div')
+    ET.SubElement(root, 'p').text = trees[1]['contents']
+
+    def addChildren(root, tree):
+
+        mylist = ET.SubElement(root, 'ul')
+
+        for child in tree['children']:
+
+            item = ET.SubElement(mylist, 'li')
+            item.text = child['reading']
+            new_root = ET.SubElement(item, 'div')
+            ET.SubElement(new_root, 'p').text = child['contents']
+            addChildren(new_root, child)
+
+    addChildren(root, trees[1])
+
+    return ET.ElementTree(root)

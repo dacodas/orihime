@@ -17,17 +17,20 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 class WordRelationSerializer(serializers.ModelSerializer):
 
+    text = serializers.SlugRelatedField(many=False,
+                                        read_only=False,
+                                        queryset=Text.objects.all(),
+                                        slug_field='contents')
+    word = serializers.SlugRelatedField(many=False,
+                                        read_only=False,
+                                        queryset=Word.objects.all(),
+                                        slug_field='reading')
+
     class Meta:
 
         model = WordRelation
-        fields = ['text', 'word']
+        fields = ['text', 'word', 'begin', 'end']
 
-    serializers.SlugRelatedField(many=False,
-                                 read_only=True,
-                                 slug_field='text')
-    serializers.SlugRelatedField(many=False,
-                                 read_only=True,
-                                 slug_field='word')
 
 class SourceSerializer(serializers.ModelSerializer):
 
