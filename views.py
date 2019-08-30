@@ -8,6 +8,8 @@ from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer,
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
 
+from oauth2_provider.views.generic import ProtectedResourceView
+
 from lxml import etree
 
 import requests
@@ -186,3 +188,8 @@ def TextTreeView(request, **kwargs):
 
     return django.shortcuts.render(request, 'text-tree.html', {"ANKI_Text": response, "toggle_snippet": ""})
 
+class ApiEndpoint(ProtectedResourceView):
+
+    def get(self, request, *args, **kwargs):
+
+        return HttpResponse('Hello, OAuth2!')

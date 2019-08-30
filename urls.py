@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.contrib.auth import authenticate, login;
+from django.contrib.auth import authenticate
+from django.contrib.auth import views as auth_views;
 from django.urls import path, include
 
 from orihime.views import \
@@ -24,7 +25,9 @@ from orihime.views import \
     _WordRelationViewSet, \
     WordViewSet, \
     login_view, \
-    search
+    search, \
+    ApiEndpoint
+
 
 from rest_framework import routers
 
@@ -42,11 +45,14 @@ router.register(r'sources', SourceViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', login_view, name='login'),
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('search/<str:word>', search, name="sources"),
     path('api/', include(router.urls)),
     path('text-tree/<int:id>', orihime.views.TextTreeView, name="text-tree"),
-    path('_text-tree/<int:id>', orihime.views._TextTreeView, name="text-tree")
+    path('_text-tree/<int:id>', orihime.views._TextTreeView, name="text-tree"),
+    path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('api/hello', ApiEndpoint.as_view())
 ] \
 + django.conf.urls.static.static(settings.STATIC_URL, document_root = settings.STATIC_ROOT) \
 + router.urls

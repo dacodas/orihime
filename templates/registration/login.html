@@ -3,8 +3,10 @@
     <body>
         <form method="post">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
             <input type="text" name="username">
             <input type="password" name="password">
+            <input type="submit">
         </form>
     </body>
 </html>
