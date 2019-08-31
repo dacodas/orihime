@@ -49,14 +49,14 @@ function search_word(reading)
         }
 
         var oReq = new XMLHttpRequest();
-        oReq.open("POST", "/words/");
+        oReq.open("POST", "/_words/");
         oReq.setRequestHeader("Content-Type", "application/json");
         oReq.setRequestHeader("X-CSRFToken", csrftoken);
         oReq.send(JSON.stringify(body));
     }
 
     var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", add_word);
+    // oReq.addEventListener("load", add_word);
     oReq.open("POST", "/search/" + reading, false);
     oReq.send();
 
@@ -76,7 +76,7 @@ function add_child_word()
     let ocurrence = selection.toString();
     let reading = ocurrence;
 
-    search_word(reading)
+    var definition = search_word(reading)
 
     function reqListener () {
         console.log(this.responseText);
@@ -84,9 +84,9 @@ function add_child_word()
     }
 
     body = {
+        "reading": reading,
+        "definition": definition,
         "text": text_hash,
-        "word": reading,
-        // "ocurrence": ocurrence
         "begin": 5,
         "end": 10
     }

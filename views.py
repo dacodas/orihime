@@ -4,7 +4,16 @@ from django.http import HttpResponse, HttpResponseServerError
 
 from rest_framework import viewsets, generics, permissions, decorators
 
-from orihime.serializers import UserSerializer, GroupSerializer, TextSerializer, SourceSerializer, WordRelationSerializer, WordSerializer, _WordRelationSerializer
+from orihime.serializers import \
+    UserSerializer, \
+    GroupSerializer, \
+    TextSerializer, \
+    SourceSerializer, \
+    WordRelationSerializer, \
+    WordSerializer, \
+    _WordRelationSerializer, \
+    WordRelationSerializerCreateIntermediaries
+
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
 
@@ -91,6 +100,31 @@ class WordViewSet(UseCurrentUserMixin,
                           IsOwnerOrReadOnly]
     queryset = Word.objects.all()
 
+@decorators.api_view(['POST'])
+def WordRelationCreateInt(request):
+
+    import collections
+    newQueryDict = request.data.copy()
+    newQueryDict['user'] = request.user.email
+    fauxRequest = collections.namedtuple('Request', 'data')(newQueryDict)
+
+    word_relation_serializer = WordRelationSerializerCreateIntermediaries(data=fauxRequest.data)
+
+    if not word_relation_serializer.is_valid():
+        raise ValueError(word_relation_serializer.errors)
+
+    word_relation = word_relation_serializer.create(word_relation_serializer.validated_data)
+    
+    return HttpResponse(content="You're gucci", content_type='text/plain', status=200)
+
+class WordRelationCreate(UseCurrentUserMixin,
+                         generics.CreateAPIView):
+
+    serializer_class = WordRelationSerializerCreateIntermediaries
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
+    queryset = WordRelation.objects.all()
+
 # Find out permissions, make sure users can only add relations between
 # words and texts that they own
 class WordRelationViewSet(viewsets.ModelViewSet):
@@ -168,7 +202,8 @@ def _TextTreeView(request, **kwargs):
             item = ET.SubElement(mylist, 'li', {'class': 'orihime-word'})
             ET.SubElement(item, 'div', {'class': 'reading'}).text = child['reading']
             new_root = ET.SubElement(item, 'div', {'class': 'definition', 'id': str(child['id'])})
-            ET.SubElement(new_root, 'p').text = child['contents']
+            new_root.text = child['contents']
+            # ET.SubElement(new_root, 'p').text = child['contents']
             addChildren(new_root, child)
 
     addChildren(root, trees[kwargs['id']])

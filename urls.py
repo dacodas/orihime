@@ -26,8 +26,8 @@ from orihime.views import \
     WordViewSet, \
     login_view, \
     search, \
-    ApiEndpoint
-
+    ApiEndpoint, \
+    WordRelationSerializerCreateIntermediaries
 
 from rest_framework import routers
 
@@ -39,8 +39,9 @@ import orihime
 router = routers.SimpleRouter()
 router.register(r'texts', TextViewSet)
 router.register(r'word-relations', WordRelationViewSet)
-router.register(r'_word-relations', _WordRelationViewSet)
+# router.register(r'_word-relations', _WordRelationViewSet)
 router.register(r'words', WordViewSet)
+# router.register(r'_words', WordCreateTextView)
 router.register(r'sources', SourceViewSet)
 
 urlpatterns = [
@@ -51,6 +52,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('text-tree/<int:id>', orihime.views.TextTreeView, name="text-tree"),
     path('_text-tree/<int:id>', orihime.views._TextTreeView, name="text-tree"),
+    path('_word-relations/', orihime.views.WordRelationCreateInt, name="_words-relations"),
     path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('api/hello', ApiEndpoint.as_view())
 ] \

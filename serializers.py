@@ -71,6 +71,7 @@ class TextSerializer(serializers.ModelSerializer):
         model = Text
         fields = ['contents', 'source', 'user']
 
+
 class WordSerializer(serializers.ModelSerializer):
 
     definition = serializers.SlugRelatedField(many=False,
@@ -85,3 +86,35 @@ class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = ['reading', 'definition', 'user']
+
+class WordRelationSerializerCreateIntermediaries(serializers.ModelSerializer):
+
+    definition = serializers.CharField()
+    reading = serializers.CharField()
+    user = serializers.SlugRelatedField(many=False,
+                                        read_only=False,
+                                        queryset=User.objects.all(),
+                                        slug_field='email')
+
+    class Meta:
+
+        model = WordRelation
+        fields = ['begin', 'end', 'definition', 'reading', 'user', 'text']
+
+    def create(self, validated_data):
+
+        definition_text = Text.objects.create(source=None,
+                                              user=validated_data['user'],
+                                              contents=validated_data['definition'])
+        word = Word.objects.create(reading=validated_data['reading'],
+                                   definition=definition_text,
+                                   user=validated_data['user'])
+
+        validated_data.pop('definition')
+        validated_data.pop('reading')
+        validated_data.pop('user')
+        validated_data['word'] = word
+
+        word_relation = super(WordRelationSerializerCreateIntermediaries, self).create(validated_data)
+
+        return word_relation
