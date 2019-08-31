@@ -44,8 +44,10 @@ def search_larousse(word):
 
     root = etree.HTML(response.content)
 
-    return HttpResponse(content = 
-                        etree.tostring(root.xpath("//ul[@class='Definitions']")[0], method='text', encoding='utf-8').decode('utf-8'))
+    # This needs sanitization
+    serialized_html = etree.tostring(root.xpath("//ul[@class='Definitions']")[0], encoding='utf-8').decode('utf-8')
+
+    return HttpResponse(content = serialized_html)
 
 
 @django.views.decorators.csrf.csrf_exempt
@@ -202,7 +204,15 @@ def _TextTreeView(request, **kwargs):
             item = ET.SubElement(mylist, 'li', {'class': 'orihime-word'})
             ET.SubElement(item, 'div', {'class': 'reading'}).text = child['reading']
             new_root = ET.SubElement(item, 'div', {'class': 'definition', 'id': str(child['id'])})
-            new_root.text = child['contents']
+            try: 
+
+                child_element = ET.fromstring(child['contents'].replace('&#13;', ''))
+                new_root.append(child_element)
+
+            except ET.ParseError:
+
+                new_root.text = child['contents']
+
             # ET.SubElement(new_root, 'p').text = child['contents']
             addChildren(new_root, child)
 
