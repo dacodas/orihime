@@ -58,6 +58,7 @@ class SourceSerializer(serializers.ModelSerializer):
 class TextSerializer(serializers.ModelSerializer):
 
     source = serializers.SlugRelatedField(many=False,
+                                          allow_null=True,
                                           read_only=False,
                                           queryset=Source.objects.all(),
                                           slug_field='name')

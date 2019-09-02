@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ flatpage.title }}</title>
+<script src="{% static "js/tinymce/js/tinymce/tinymce.min.js" %}" referrerpolicy="origin"></script>
+<script>tinymce.init({entity_encoding: "raw", selector:'textarea', plugins: 'code'/* , toolbar: 'code' */, menubar: 'tools'});</script>
+</head>
+<body>
+    <form action="/mce-test/" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

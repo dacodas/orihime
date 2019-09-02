@@ -72,7 +72,7 @@ function add_child_word()
     // let selection = window.getSelection()
     let selection = highlighted_selection
 
-    let text_hash = selection.anchorNode.parentElement.id;
+    let text_hash = selection.anchorNode.parentElement.closest("div.definition").id;
     let ocurrence = selection.toString();
     let reading = ocurrence;
 

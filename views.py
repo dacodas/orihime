@@ -2,6 +2,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpResponseServerError
 
+import xml.etree.ElementTree as ET
+
 from rest_framework import viewsets, generics, permissions, decorators
 
 from orihime.serializers import \
@@ -113,6 +115,7 @@ def WordRelationCreateInt(request):
     word_relation_serializer = WordRelationSerializerCreateIntermediaries(data=fauxRequest.data)
 
     if not word_relation_serializer.is_valid():
+
         raise ValueError(word_relation_serializer.errors)
 
     word_relation = word_relation_serializer.create(word_relation_serializer.validated_data)
@@ -157,7 +160,7 @@ class SourceViewSet(viewsets.ModelViewSet):
 
 from django.db import connection
 
-def _TextTreeView(request, **kwargs):
+def sqlTextTree(id):
 
     # Instead of doing this, package the application, and use
     # distutils or setup packaging and source finding utilities
@@ -170,8 +173,14 @@ def _TextTreeView(request, **kwargs):
         query = f.read()
 
     with connection.cursor() as cursor:
-        cursor.execute(query, [kwargs['id']])
+        cursor.execute(query, [id])
         results = cursor.fetchall()
+
+    return results
+
+def TextTree(id):
+
+    results = sqlTextTree(id)
 
     trees = dict()
 
@@ -188,37 +197,62 @@ def _TextTreeView(request, **kwargs):
 
         trees[tree['id']] = tree
 
-    print(trees)
+    return trees
 
-    import xml.etree.ElementTree as ET
+def renderDefinition(string, root):
 
-    root = ET.Element('div', {'id': 'orihime-text'})
-    ET.SubElement(root, 'div', {'id': str(kwargs['id'])}).text = trees[kwargs['id']]['contents']
+    entities_text = '''
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" [
+    <!ENTITY nbsp ' '>
+]>
+'''
 
-    def addChildren(root, tree):
+    string_sans_entities = string
+    string = entities_text + string.replace('&#13;', '')
 
-        mylist = ET.SubElement(root, 'ul')
+    # Will return either plain text or sanitized HTML
+    try: 
 
-        for child in tree['children']:
+        print("Parsing: \n{}".format(string))
+        element = ET.fromstring(string)
+        root.append(element)
+ 
+    except ET.ParseError as e:
+ 
+        print("Got parse error: {}".format(e))
+        root.text = string_sans_entities
 
-            item = ET.SubElement(mylist, 'li', {'class': 'orihime-word'})
-            ET.SubElement(item, 'div', {'class': 'reading'}).text = child['reading']
-            new_root = ET.SubElement(item, 'div', {'class': 'definition', 'id': str(child['id'])})
-            try: 
+def addChildren(root, tree):
 
-                child_element = ET.fromstring(child['contents'].replace('&#13;', ''))
-                new_root.append(child_element)
+    words_list = ET.SubElement(root, 'ul', {'class': 'orihime-words'})
 
-            except ET.ParseError:
+    for child in tree['children']:
 
-                new_root.text = child['contents']
+        print("Adding child {} to {}".format(child['reading'], words_list))
 
-            # ET.SubElement(new_root, 'p').text = child['contents']
-            addChildren(new_root, child)
+        item = ET.SubElement(words_list, 'li', {'class': 'orihime-word'})
+        ET.SubElement(item, 'div', {'class': 'reading'}).text = child['reading']
+        definition = ET.SubElement(item, 'div', {'class': 'definition', 'id': str(child['id'])})
+
+        renderDefinition(child['contents'], definition)
+
+        addChildren(item, child)
+
+def _TextTreeView(request, **kwargs):
+
+    id = kwargs['id']
+
+    trees = TextTree(id)
+
+    root = ET.Element('div', {'class': 'anki-text'})
+    definition = ET.SubElement(root, 'div', {'class': 'definition', 'id': str(id)})
+    renderDefinition(trees[id]['contents'], definition)
 
     addChildren(root, trees[kwargs['id']])
-    # HTMLDocument = ET.ElementTree(root)
-    string = ET.tostring(root).decode('utf-8')
+
+    string = ET.tostring(root, method='html').decode('utf-8')
+    print(string)
 
     return HttpResponse(string)
 

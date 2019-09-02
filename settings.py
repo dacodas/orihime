@@ -44,8 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'oauth2_provider',
     'corsheaders',
-    'orihime'
+    'orihime',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
+    'tinymce'
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
