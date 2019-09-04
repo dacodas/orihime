@@ -20,22 +20,25 @@ function getCookie(name) {
 // This appears to be currently broken
 function update_definition()
 {
-    let result = document.evaluate("//div[@id=\"orihime-text\"]/div[@class=\"definition\"]", document)
-    let text_hash = result.iterateNext().id
+    let xpath = "//div[@id=\"orihime-text-tree\"]/div[@class=\"definition\"]"
+    let main_text_div = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+    let text_hash = main_text_div.id
 
     let selection = window.getSelection()
 
     function reqListener () {
         console.log(this.responseText);
-        result = document.evaluate("//div[@id=\"orihime-text\"]", document);
+        result = document.evaluate("//div[@id=\"orihime-text-tree\"]", document);
         result.iterateNext().innerHTML = this.responseText;
         hide_words_and_set_onclick();
     }
 
+    var csrftoken = getCookie('csrftoken');
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", reqListener);
     oReq.open("POST", "/_text-tree/" + text_hash);
     oReq.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    oReq.setRequestHeader("X-CSRFToken", csrftoken);
     oReq.send()
 }
 
@@ -74,20 +77,22 @@ function handle_search_response(event)
     }
 }
 
-var test = []
 function handle_search_result_click(event)
 {
-    var list_item = this;
+    let list_item = this;
 
-    var header = document.evaluate("//li/h1", list_item, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
-    reading = header.innerText
+    let header = document.evaluate("./h1", list_item, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+    let reading = header.innerText
 
-    var definition_div = document.evaluate("//li/div[@class=\"definition\"]", list_item, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
-    definition = definition_div.innerHTML
+    let definition_div = document.evaluate("./div[@class=\"definition\"]", list_item, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+    let definition = definition_div.innerHTML
 
     console.log("You clicked a search result");
     console.log("Reading: " + reading);
     console.log("Definition: " + definition);
+
+    let overlay_div = document.evaluate("//div[@id=\"overlay\"]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+    overlay_div.remove()
 
     add_child_word(reading, definition, orihime_selection.text_hash)
 }
@@ -128,6 +133,7 @@ function OrihimeSelection()
             this.text_hash = selection.anchorNode.parentElement.closest("div.definition").id;
             this.ocurrence = selection.toString();
             this.reading = this.ocurrence;
+            this.state = "valid";
         }
     }
 

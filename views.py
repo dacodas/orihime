@@ -235,7 +235,7 @@ def _TextTreeView(request, **kwargs):
 
     trees = TextTree(id)
 
-    root = ET.Element('div', {'class': 'anki-text'})
+    root = ET.Element('div', {'id': 'orihime-text-tree'})
     definition = ET.SubElement(root, 'div', {'class': 'definition', 'id': str(id)})
     renderDefinition(trees[id]['contents'], definition)
 

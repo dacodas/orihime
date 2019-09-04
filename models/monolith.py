@@ -10,10 +10,10 @@ class Text(models.Model):
     class Meta:
 
         constraints = [
-            models.constraints.UniqueConstraint(
-                fields=['contents', 'user'],
-                name='unique_contents_per_user'
-            )
+            # models.constraints.UniqueConstraint(
+            #     fields=['contents', 'user'],
+            #     name='unique_contents_per_user'
+            # )
         ]
 
     contents = models.TextField()
