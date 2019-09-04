@@ -25,7 +25,8 @@ from orihime.views import \
     _WordRelationViewSet, \
     WordViewSet, \
     login_view, \
-    search, \
+    search_larousse, \
+    search_goo, \
     ApiEndpoint, \
     WordRelationSerializerCreateIntermediaries
 
@@ -50,7 +51,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('search/<str:word>', search, name="sources"),
+    path('search/<str:word>', search_larousse, name="sources"),
+    path('search/larousse/<str:word>', search_larousse, name="sources"),
+    path('search/goo/<str:word>', search_goo, name="sources"),
     path('mce-test/', orihime.mceflatpage.test.mce_test, name="tinymcetest"),
     path('api/', include(router.urls)),
     path('text-tree/<int:id>', orihime.views.TextTreeView, name="text-tree"),

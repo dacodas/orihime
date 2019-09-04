@@ -1,4 +1,5 @@
-var highlighted_selection = null
+// As a general reference
+// https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#The_value_of_this_within_the_handler
 
 function getCookie(name) {
     var cookieValue = null;
@@ -16,6 +17,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// This appears to be currently broken
 function update_definition()
 {
     let result = document.evaluate("//div[@id=\"orihime-text\"]/div[@class=\"definition\"]", document)
@@ -37,52 +39,61 @@ function update_definition()
     oReq.send()
 }
 
-function search_word(reading)
+// Switch on backend selection
+function search_for_selection()
 {
-    var csrftoken = getCookie('csrftoken');
-
-    function add_word()
-    {
-        body = {
-            "reading": reading,
-            "definition": this.responseText
-        }
-
-        var oReq = new XMLHttpRequest();
-        oReq.open("POST", "/_words/");
-        oReq.setRequestHeader("Content-Type", "application/json");
-        oReq.setRequestHeader("X-CSRFToken", csrftoken);
-        oReq.send(JSON.stringify(body));
-    }
-
-    var oReq = new XMLHttpRequest();
-    // oReq.addEventListener("load", add_word);
-    oReq.open("POST", "/search/" + reading, false);
-    oReq.send();
-
-    return oReq.responseText;
+    var search_request = new XMLHttpRequest();
+    search_request.open("POST", "/search/goo/" + orihime_selection.reading, false);
+    // search_request.open("POST", "/search/larousse/" + orihime_selection.reading, false);
+    search_request.addEventListener("load", handle_search_response);
+    search_request.send();
 }
 
-function add_child_word()
+function handle_search_response(event)
 {
-    // Trying to get the highlighted text via window.getSelection on
-    // mouseDown or onClick doesn't work, as the highlight is
-    // deselected on mousedown
+    search_request = this
 
-    // let selection = window.getSelection()
-    let selection = highlighted_selection
+    var div = document.createElement("div");
+    div.id = "overlay";
 
-    let text_hash = selection.anchorNode.parentElement.closest("div.definition").id;
-    let ocurrence = selection.toString();
-    let reading = ocurrence;
+    div.innerHTML = "<div class=\"word-selection\"><ul>" + search_request.responseText + "</ul></div>";
+    document.body.appendChild(div)
 
-    var definition = search_word(reading)
+    // 1. Append child
+    // 2. Count number of list items in new element
+    // 3. Only go through UI with user if there are more than one
 
-    function reqListener () {
-        console.log(this.responseText);
-        update_definition();
+    search_items = document.evaluate("//*[@id=\"overlay\"]/div/ul/li", div)
+
+    var search_item = search_items.iterateNext(); 
+    while (search_item)
+    {
+        console.log("Adding a click event");
+        search_item.addEventListener("click", handle_search_result_click)
+        search_item = search_items.iterateNext();
     }
+}
 
+var test = []
+function handle_search_result_click(event)
+{
+    var list_item = this;
+
+    var header = document.evaluate("//li/h1", list_item, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+    reading = header.innerText
+
+    var definition_div = document.evaluate("//li/div[@class=\"definition\"]", list_item, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+    definition = definition_div.innerHTML
+
+    console.log("You clicked a search result");
+    console.log("Reading: " + reading);
+    console.log("Definition: " + definition);
+
+    add_child_word(reading, definition, orihime_selection.text_hash)
+}
+
+function add_child_word(reading, definition, text_hash)
+{
     body = {
         "reading": reading,
         "definition": definition,
@@ -93,24 +104,63 @@ function add_child_word()
 
     var csrftoken = getCookie('csrftoken');
     var oReq = new XMLHttpRequest();
-    oReq.addEventListener("load", reqListener);
+    oReq.addEventListener("load", update_definition);
     oReq.open("POST", "/_word-relations/");
     oReq.setRequestHeader("Content-Type", "application/json");
     oReq.setRequestHeader("X-CSRFToken", csrftoken);
     oReq.send(JSON.stringify(body));
 }
 
+function OrihimeSelection()
+{
+    this.selection = null
+    this.text_hash = null
+    this.ocurrence = null
+    this.reading = null
+    this.state = "invalid"
+
+    this.set_selection = function (selection)
+    {
+        this.selection = selection;
+
+        if ( selection.anchorNode != null )
+        {
+            this.text_hash = selection.anchorNode.parentElement.closest("div.definition").id;
+            this.ocurrence = selection.toString();
+            this.reading = this.ocurrence;
+        }
+    }
+
+    this.clear_selection = function ()
+    {
+        this.selection = null
+        this.state = "invalid"
+    }
+}
+
+// A global
+var orihime_selection = new OrihimeSelection()
+
+// Trying to get the highlighted text via window.getSelection on
+// mouseDown or onClick doesn't work, as the highlight is deselected
+// on mousedown. Hence, this function
+function setup_add_button()
 {
     let result = document.evaluate("//div[@id=\"add-button\"]", document)
     add_button = result.iterateNext()
+
+    // Use event listeners instead here?
     add_button.onmouseenter = (function ()
                         {
-                            highlighted_selection = window.getSelection();
+                            let window_selection = window.getSelection();
+                            orihime_selection.set_selection(window_selection);
                         });
     add_button.onmouseleave = (function ()
                         {
-                            highlighted_selection = null;
+                            orihime_selection.clear_selection();
                         });
-    add_button.onmousedown = add_child_word;
+    add_button.onmousedown = search_for_selection;
     add_button.onclick = null;
 }
+
+setup_add_button()

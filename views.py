@@ -38,8 +38,20 @@ def login_view(request):
     else:
         return HttpResponse("<html><body>You're a piece of shit...</body></html>")
 
-def search_larousse(word):
+@django.views.decorators.csrf.csrf_exempt
+def search_goo(request, **kwargs):
+
+    word = kwargs['word']
+    response = requests.get(
+        "http://localhost/blah.sum?reading={}".format(word),
+        headers={"Accept": "application/vnd+orihime.goo-results+html"})
+
+    return HttpResponse(content = response.content)
+
+@django.views.decorators.csrf.csrf_exempt
+def search_larousse(request, **kwargs):
     
+    word = kwargs['word']
     response = requests.get(
         "https://larousse.fr/dictionnaires/francais/{}"
         .format(word))
@@ -50,28 +62,6 @@ def search_larousse(word):
     serialized_html = etree.tostring(root.xpath("//ul[@class='Definitions']")[0], encoding='utf-8').decode('utf-8')
 
     return HttpResponse(content = serialized_html)
-
-
-@django.views.decorators.csrf.csrf_exempt
-def search(request, **kwargs):
-
-    return search_larousse(kwargs['word'])
-
-    ORIHIME_SEARCH = object()
-    ORIHIME_SEARCH_URI = "http://localhost:8081/search"
-    # 45.79.93.109
-
-    params = {x: request.POST[x] for x in ['backend', 'reading']}
-
-    response = requests.post(ORIHIME_SEARCH_URI, params=params)
-
-    if response.status_code != 200:
-
-        return HttpResponseServerError(content="That's our bad... Orihime search failed!", reason="Orihime search failed")
-
-    else:
-        
-        return HttpResponse(content=response.content, content_type='text/plain', status=200)
 
 class UseCurrentUserMixin():
 
