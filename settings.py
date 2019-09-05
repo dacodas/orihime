@@ -18,13 +18,22 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&q!7k0dgbsxjj$eo4kcu%gmh&$ionu+93=#+=d_iy*&%)ct(h#'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['testserver', '127.0.0.1']
+def bool_from_string(string):
+
+    return True if string == "True" else False
+
+DEBUG = bool_from_string(os.environ.setdefault("DEBUG", "False"))
+SECRET_KEY = '&q!7k0dgbsxjj$eo4kcu%gmh&$ionu+93=#+=d_iy*&%)ct(h#' if DEBUG else os.environ['SECRET_KEY']
+
+ALLOWED_HOSTS_PRODUCTION = ['orihime.dacodastrack.com',
+                            'orihime.service']
+
+ALLOWED_HOSTS_DEVELOPMENT = ['testserver',
+                             '127.0.0.1']
+
+ALLOWED_HOSTS = ALLOWED_HOSTS_DEVELOPMENT if DEBUG else ALLOWED_HOSTS_PRODUCTION
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -34,6 +43,9 @@ REST_FRAMEWORK = {
     }
 
 # Application definition
+
+# GOO_LOCAL_HOST="http://127.0.0.1:7081"
+GOO_LOCAL_HOST="http://mod-goo.service"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -93,10 +105,11 @@ WSGI_APPLICATION = 'orihime.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+DATABASE_PATH = "/var/lib/orihime-django/db.sqlite3"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': DATABASE_PATH
     }
 }
 

@@ -1,10 +1,17 @@
+import requests
+import django
+import json
+import rest_framework
+
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpResponseServerError
 
+from lxml import etree
 import xml.etree.ElementTree as ET
 
 from rest_framework import viewsets, generics, permissions, decorators
+from oauth2_provider.views.generic import ProtectedResourceView
 
 from orihime.serializers import \
     UserSerializer, \
@@ -18,15 +25,6 @@ from orihime.serializers import \
 
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
-
-from oauth2_provider.views.generic import ProtectedResourceView
-
-from lxml import etree
-
-import requests
-import django
-import json
-import rest_framework
 
 def login_view(request):
     username = request.POST['username']
@@ -43,7 +41,7 @@ def search_goo(request, **kwargs):
 
     word = kwargs['word']
     response = requests.get(
-        "http://localhost/blah.sum?reading={}".format(word),
+        "{}/?reading={}".format(settings.GOO_LOCAL_HOST, word),
         headers={"Accept": "application/vnd+orihime.goo-results+html"})
 
     return HttpResponse(content = response.content)
