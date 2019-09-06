@@ -8,8 +8,13 @@ https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/
 """
 
 import os
+import sys 
 
 from django.core.wsgi import get_wsgi_application
+
+project_path = "/usr/local/src/orihime-django"
+if project_path not in sys.path:
+    sys.path.insert(0, project_path)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'orihime.settings')
 

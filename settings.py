@@ -28,7 +28,7 @@ DEBUG = bool_from_string(os.environ.setdefault("DEBUG", "False"))
 SECRET_KEY = '&q!7k0dgbsxjj$eo4kcu%gmh&$ionu+93=#+=d_iy*&%)ct(h#' if DEBUG else os.environ['SECRET_KEY']
 
 ALLOWED_HOSTS_PRODUCTION = ['orihime.dacodastrack.com',
-                            'orihime.service']
+                            'orihime-django.orihime']
 
 ALLOWED_HOSTS_DEVELOPMENT = ['testserver',
                              '127.0.0.1']
@@ -45,7 +45,7 @@ REST_FRAMEWORK = {
 # Application definition
 
 # GOO_LOCAL_HOST="http://127.0.0.1:7081"
-GOO_LOCAL_HOST="http://mod-goo.service"
+GOO_LOCAL_HOST="http://mod-goo.orihime"
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -54,13 +54,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'oauth2_provider',
     'corsheaders',
-    'orihime',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'tinymce'
+    'tinymce',
+    'orihime',
 ]
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    "/srv/orihime-django/static/"
+    ]
 
 SITE_ID = 1
 
@@ -149,5 +155,24 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
 STATIC_URL = '/static/'
+STATIC_ROOT = '/srv/orihime-django/static/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/orihime-django/debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

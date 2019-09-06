@@ -1,3 +1,4 @@
+import logging
 import requests
 import django
 import json
@@ -25,6 +26,11 @@ from orihime.serializers import \
 
 from orihime.models.monolith import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
+
+import orihime.settings as settings
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 def login_view(request):
     username = request.POST['username']
@@ -99,6 +105,10 @@ def WordRelationCreateInt(request):
     newQueryDict = request.data.copy()
     newQueryDict['user'] = request.user.email
     fauxRequest = collections.namedtuple('Request', 'data')(newQueryDict)
+
+    logger.debug(request.user)
+    logger.debug(request.user.email)
+    logger.debug(request.user.is_authenticated)
 
     word_relation_serializer = WordRelationSerializerCreateIntermediaries(data=fauxRequest.data)
 
