@@ -15,21 +15,43 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ['url', 'name']
 
-# Same as below, but specify text with an ID
-class _WordRelationSerializer(serializers.ModelSerializer):
+class WordSerializer(serializers.ModelSerializer):
 
-    text = serializers.PrimaryKeyRelatedField(many=False,
+    definition = serializers.SlugRelatedField(many=False,
                                               read_only=False,
-                                              queryset=Text.objects.all())
-    word = serializers.SlugRelatedField(many=False,
+                                              queryset=Text.objects.all(),
+                                              slug_field='contents')
+    user = serializers.SlugRelatedField(many=False,
                                         read_only=False,
-                                        queryset=Word.objects.all(),
-                                        slug_field='reading')
+                                        queryset=User.objects.all(),
+                                        slug_field='email')
+
+    class Meta:
+        model = Word
+        fields = ['reading', 'definition', 'user']
+
+class TextSerializer(serializers.ModelSerializer):
+
+    source = serializers.SlugRelatedField(many=False,
+                                          allow_null=True,
+                                          read_only=False,
+                                          queryset=Source.objects.all(),
+                                          slug_field='name')
+    user = serializers.SlugRelatedField(many=False,
+                                        read_only=False,
+                                        queryset=User.objects.all(),
+                                        slug_field='email')
+
+    class Meta:
+        model = Text
+        fields = ['contents', 'source', 'user']
+
+class SourceSerializer(serializers.ModelSerializer):
 
     class Meta:
 
-        model = WordRelation
-        fields = ['text', 'word', 'begin', 'end']
+        model = Source
+        fields = ['name']
 
 class WordRelationSerializer(serializers.ModelSerializer):
 
@@ -46,47 +68,6 @@ class WordRelationSerializer(serializers.ModelSerializer):
 
         model = WordRelation
         fields = ['text', 'word', 'begin', 'end']
-
-
-class SourceSerializer(serializers.ModelSerializer):
-
-    class Meta:
-
-        model = Source
-        fields = ['name']
-
-class TextSerializer(serializers.ModelSerializer):
-
-    source = serializers.SlugRelatedField(many=False,
-                                          allow_null=True,
-                                          read_only=False,
-                                          queryset=Source.objects.all(),
-                                          slug_field='name')
-    user = serializers.SlugRelatedField(many=False,
-                                        read_only=False,
-                                        queryset=User.objects.all(),
-                                        slug_field='email')
-    # source = SourceSerializer
-
-    class Meta:
-        model = Text
-        fields = ['contents', 'source', 'user']
-
-
-class WordSerializer(serializers.ModelSerializer):
-
-    definition = serializers.SlugRelatedField(many=False,
-                                              read_only=False,
-                                              queryset=Text.objects.all(),
-                                              slug_field='contents')
-    user = serializers.SlugRelatedField(many=False,
-                                        read_only=False,
-                                        queryset=User.objects.all(),
-                                        slug_field='email')
-
-    class Meta:
-        model = Word
-        fields = ['reading', 'definition', 'user']
 
 class WordRelationSerializerCreateIntermediaries(serializers.ModelSerializer):
 
@@ -119,3 +100,19 @@ class WordRelationSerializerCreateIntermediaries(serializers.ModelSerializer):
         word_relation = super(WordRelationSerializerCreateIntermediaries, self).create(validated_data)
 
         return word_relation
+
+class _WordRelationSerializer(serializers.ModelSerializer):
+
+    text = serializers.PrimaryKeyRelatedField(many=False,
+                                              read_only=False,
+                                              queryset=Text.objects.all())
+    word = serializers.SlugRelatedField(many=False,
+                                        read_only=False,
+                                        queryset=Word.objects.all(),
+                                        slug_field='reading')
+
+    class Meta:
+
+        model = WordRelation
+        fields = ['text', 'word', 'begin', 'end']
+

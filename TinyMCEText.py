@@ -17,7 +17,7 @@ class SourceModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return "{}".format(obj.name)
 
-class FlatPageForm(forms.ModelForm):
+class TinyMCETextForm(forms.ModelForm):
 
     contents = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}))
     source = SourceModelChoiceField(queryset=Source.objects.all(),
@@ -29,8 +29,7 @@ class FlatPageForm(forms.ModelForm):
         model = Text
         fields = ['contents', 'source']
 
-# Only allow viewing this page if authenticated        
-def mce_test(request):
+def TinyMCETextView(request):
 
     if not request.user.is_authenticated: 
 
@@ -38,7 +37,7 @@ def mce_test(request):
 
     if request.method == 'POST':
 
-        form = FlatPageForm(request.POST)
+        form = TinyMCETextForm(request.POST)
 
         if form.is_valid():
 
@@ -65,5 +64,5 @@ def mce_test(request):
 
     else:
         
-        form = FlatPageForm()
-        return render(request, 'flatpages/tinymce-test.html', {'form': form})
+        form = TinyMCETextForm()
+        return render(request, 'orihime/tinymce-text-viejw.html', {'form': form})
