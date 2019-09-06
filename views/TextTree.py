@@ -1,6 +1,7 @@
 import os
 
 import django.db
+import django.http
 
 import xml.etree.ElementTree as ET
 
@@ -74,7 +75,7 @@ def _TextTreeView(request, **kwargs):
     string = ET.tostring(root, method='html').decode('utf-8')
     print(string)
 
-    return HttpResponse(string)
+    return django.http.HttpResponse(string)
 
 def TextTreeView(request, **kwargs):
 
