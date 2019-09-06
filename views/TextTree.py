@@ -79,7 +79,7 @@ def _TextTreeView(request, **kwargs):
 def TextTreeView(request, **kwargs):
 
     import django.template
-    template = django.template.loader.get_template('text-tree.html')
+    template = django.template.loader.get_template('orihime/text-tree.html')
 
     import django.shortcuts
 
