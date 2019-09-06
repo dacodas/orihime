@@ -62,7 +62,9 @@ urlpatterns = [
     path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('api/hello', ApiEndpoint.as_view()),
     path('tinymce/', include('tinymce.urls')),
-    path('about/', views.flatpage, {'url': '/about/'}, name='about')
+    path('about/', views.flatpage, {'url': '/about/'}, name='about'),
+    # path('accounts/', include('django_registration.backends.activation.urls')),
+    path('accounts/', include('django_registration.backends.one_step.urls')),
 ] \
 + django.conf.urls.static.static(settings.STATIC_URL, document_root = settings.STATIC_ROOT) \
 + router.urls

@@ -6,7 +6,7 @@ from tinymce.widgets import TinyMCE
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
 
-from orihime.models.monolith import Source, Text, Word, WordRelation
+from orihime.models import Source, Text, Word, WordRelation
 
 from orihime.serializers import TextSerializer
 

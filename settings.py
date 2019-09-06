@@ -35,6 +35,8 @@ ALLOWED_HOSTS_DEVELOPMENT = ['testserver',
 
 ALLOWED_HOSTS = ALLOWED_HOSTS_DEVELOPMENT if DEBUG else ALLOWED_HOSTS_PRODUCTION
 
+ACCOUNT_ACTIVATION_DAYS = 7
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
@@ -54,11 +56,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'oauth2_provider',
-    'corsheaders',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'django_registration',
+    'oauth2_provider',
+    'rest_framework',
+    'corsheaders',
     'tinymce',
     'orihime',
 ]

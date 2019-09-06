@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
-from orihime.models.monolith import Source, Text, Word, WordRelation
+from orihime.models import Source, Text, Word, WordRelation
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 

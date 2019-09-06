@@ -24,7 +24,7 @@ from orihime.serializers import \
     _WordRelationSerializer, \
     WordRelationSerializerCreateIntermediaries
 
-from orihime.models.monolith import Source, Text, Word, WordRelation
+from orihime.models import Source, Text, Word, WordRelation
 from orihime.permissions import IsOwnerOrReadOnly
 
 import orihime.settings as settings
