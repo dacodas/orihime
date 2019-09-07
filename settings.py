@@ -28,6 +28,8 @@ CORS_ORIGIN_WHITELIST = [
     "http://127.0.0.1:8000"
 ]
 
+LOGIN_REDIRECT_URL = '/text/'
+
 STATIC_URL = '/static/'
 
 ACCOUNT_ACTIVATION_DAYS = 7

@@ -22,21 +22,19 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
 
-    # path('accounts/', include('django_registration.backends.activation.urls')),
-    path('accounts/', include('django_registration.backends.one_step.urls')),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('', include([path('', include('django_registration.backends.one_step.urls')),
+                      path('', include('django.contrib.auth.urls'))]))
 
     path('tinymce/', include('tinymce.urls')),
-    path('mce-test/', orihime.TinyMCEText.TinyMCETextView, name="tinymcetest"),
+    path('text/', orihime.TinyMCEText.TinyMCETextView, name="orihime-text"),
 
-    path('text-tree/<int:id>', orihime.views.TextTree.TextTreeView, name="text-tree"),
-    path('_text-tree/<int:id>', orihime.views.TextTree._TextTreeView, name="text-tree"),
-    path('_word-relations/', orihime.views.WordRelationCreateWithIntermediaries.WordRelationCreateWithIntermediaries, name="_words-relations"),
+    path('text-tree/<int:id>', orihime.views.TextTree.TextTreeView, name="orihime-text-tree"),
+    path('_text-tree/<int:id>', orihime.views.TextTree._TextTreeView, name="orihime-_text-tree"),
+    path('_word-relations/', orihime.views.WordRelationCreateWithIntermediaries.WordRelationCreateWithIntermediaries, name="orihime-_words-relations"),
 
-    path('search/<str:word>', orihime.views.search.search_larousse, name="sources"),
-    path('search/larousse/<str:word>', orihime.views.search.search_larousse, name="sources"),
-    path('search/goo/<str:word>', orihime.views.search.search_goo, name="sources"),
+    path('search/<str:word>', orihime.views.search.search_larousse, name="orihime-search"),
+    path('search/larousse/<str:word>', orihime.views.search.search_larousse, name="orihime-search-larousse"),
+    path('search/goo/<str:word>', orihime.views.search.search_goo, name="orihime-search-goo"),
 
     # oauth testing
     path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
