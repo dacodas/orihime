@@ -23,7 +23,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
 
     path('', include([path('', include('django_registration.backends.one_step.urls')),
-                      path('', include('django.contrib.auth.urls'))]))
+                      path('', include('django.contrib.auth.urls'))])),
 
     path('tinymce/', include('tinymce.urls')),
     path('text/', orihime.TinyMCEText.TinyMCETextView, name="orihime-text"),
