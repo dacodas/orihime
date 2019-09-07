@@ -65,4 +65,4 @@ def TinyMCETextView(request):
     else:
         
         form = TinyMCETextForm()
-        return render(request, 'orihime/tinymce-text-viejw.html', {'form': form})
+        return render(request, 'orihime/tinymce-text-view.html', {'form': form})
