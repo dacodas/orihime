@@ -5,6 +5,8 @@ import django.http
 
 import xml.etree.ElementTree as ET
 
+import bleach
+
 # https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
 def sqlTextTree(id):
 
@@ -97,7 +99,7 @@ def renderDefinition(string, root):
 ]>
 '''
 
-    string_sans_entities = string
+    string_sans_entities = bleach.clean(string)
     string = entities_text + string.replace('&#13;', '')
 
     # Will return either plain text or sanitized HTML
