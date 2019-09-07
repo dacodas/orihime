@@ -2,6 +2,8 @@ import os
 
 import django.db
 import django.http
+import django.template
+import django.shortcuts
 
 import xml.etree.ElementTree as ET
 
@@ -62,9 +64,7 @@ def addChildren(root, tree):
 
         addChildren(item, child)
 
-def _TextTreeView(request, **kwargs):
-
-    id = kwargs['id']
+def _TextTreeView(id):
 
     trees = TextTree(id)
 
@@ -72,7 +72,7 @@ def _TextTreeView(request, **kwargs):
     definition = ET.SubElement(root, 'div', {'class': 'definition', 'id': str(id)})
     renderDefinition(trees[id]['contents'], definition)
 
-    addChildren(root, trees[kwargs['id']])
+    addChildren(root, trees[id])
 
     string = ET.tostring(root, method='html').decode('utf-8')
     print(string)
@@ -81,14 +81,9 @@ def _TextTreeView(request, **kwargs):
 
 def TextTreeView(request, **kwargs):
 
-    import django.template
-    template = django.template.loader.get_template('orihime/text-tree.html')
+    text_tree = _TextTreeView(kwargs['id']).content.decode('utf-8')
 
-    import django.shortcuts
-
-    response = _TextTreeView(None, **kwargs).content.decode('utf-8')
-
-    return django.shortcuts.render(request, 'orihime/text-tree.html', {"ANKI_Text": response, "toggle_snippet": ""})
+    return django.shortcuts.render(request, 'orihime/text-tree.html', {"text_tree": text_tree})
 
 def renderDefinition(string, root):
 

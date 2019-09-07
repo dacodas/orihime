@@ -1,12 +1,9 @@
-<html>
-    <head></head>
-    <body>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ next }}">
-            <input type="text" name="username">
-            <input type="password" name="password">
-            <input type="submit">
-        </form>
-    </body>
-</html>
+{% extends "orihime/base.html" %}
+
+{% block body %}
+<form action="/accounts/register/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}
