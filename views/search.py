@@ -4,12 +4,14 @@ import django
 
 import lxml.etree
 
+import orihime.settings
+
 @django.views.decorators.csrf.csrf_exempt
 def search_goo(request, **kwargs):
 
     word = kwargs['word']
     response = requests.get(
-        "{}/?reading={}".format(settings.GOO_LOCAL_HOST, word),
+        "{}/?reading={}".format(orihime.settings.GOO_LOCAL_HOST, word),
         headers={"Accept": "application/vnd+orihime.goo-results+html"})
 
     return HttpResponse(content = response.content)

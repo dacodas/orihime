@@ -2,6 +2,7 @@ import os
 
 from . import production 
 from . import local
+from . import kubernetes
 
 ENVIRONMENT = os.environ['ORIHIME_DJANGO_ENVIRONMENT']
 
