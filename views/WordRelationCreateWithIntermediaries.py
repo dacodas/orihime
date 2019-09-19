@@ -1,6 +1,12 @@
 import collections
+import logging
+import django.http
 
 import rest_framework.decorators
+
+from orihime.serializers import WordRelationSerializerCreateIntermediaries
+
+logger = logging.getLogger()
 
 @rest_framework.decorators.api_view(['POST'])
 def WordRelationCreateWithIntermediaries(request):
@@ -21,4 +27,4 @@ def WordRelationCreateWithIntermediaries(request):
 
     word_relation = word_relation_serializer.create(word_relation_serializer.validated_data)
     
-    return HttpResponse(content="You're gucci", content_type='text/plain', status=200)
+    return django.http.HttpResponse(content="You're gucci", content_type='text/plain', status=200)

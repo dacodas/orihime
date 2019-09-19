@@ -1,6 +1,7 @@
 import logging
 import requests
 import django
+import django.http
 
 import lxml.etree
 
@@ -14,7 +15,7 @@ def search_goo(request, **kwargs):
         "{}/?reading={}".format(orihime.settings.GOO_LOCAL_HOST, word),
         headers={"Accept": "application/vnd+orihime.goo-results+html"})
 
-    return HttpResponse(content = response.content)
+    return django.http.HttpResponse(content = response.content)
 
 @django.views.decorators.csrf.csrf_exempt
 def search_larousse(request, **kwargs):
@@ -29,4 +30,4 @@ def search_larousse(request, **kwargs):
     # This needs sanitization
     serialized_html = lxml.etree.tostring(root.xpath("//ul[@class='Definitions']")[0], encoding='utf-8').decode('utf-8')
 
-    return HttpResponse(content = serialized_html)
+    return django.http.HttpResponse(content = serialized_html)
