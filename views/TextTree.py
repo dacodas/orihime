@@ -64,8 +64,10 @@ def addChildren(root, tree):
 
         addChildren(item, child)
 
-def _TextTreeView(id):
+# This endpoint is used in the Javascript
+def _TextTreeView(request, **kwargs):
 
+    id = kwargs['id']
     trees = TextTree(id)
 
     root = ET.Element('div', {'id': 'orihime-text-tree'})
@@ -81,7 +83,7 @@ def _TextTreeView(id):
 
 def TextTreeView(request, **kwargs):
 
-    text_tree = _TextTreeView(kwargs['id']).content.decode('utf-8')
+    text_tree = _TextTreeView(request, **kwargs).content.decode('utf-8')
 
     return django.shortcuts.render(request, 'orihime/text-tree.html', {"text_tree": text_tree})
 

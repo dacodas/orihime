@@ -15,6 +15,8 @@ hostnames = list(itertools.accumulate(
     lambda x, y: '{}.{}'.format(x, y)
 ))
 
+hostnames = hostnames + ["orihime-{}.dacodastrack.com".format(release)]
+
 DEBUG = True
 SECRET_KEY = '&q!7k0dgbsxjj$eo4kcu%gmh&$ionu+93=#+=d_iy*&%)ct(h#'
 ALLOWED_HOSTS = hostnames 
