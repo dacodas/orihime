@@ -1,19 +1,25 @@
-WITH RECURSIVE WordInContext(id, parent, reading, begin, end, contents) AS (
-    SELECT orihime_text.id, NULL, "", 0, 0, orihime_text.contents
-    FROM orihime_text
-    WHERE orihime_text.id = %s
+-- TODO: Look into limiting recursion
+-- TODO: Add source name
+WITH RECURSIVE WordInContext(ParentTextID, ChildTextID, ChildWordID, reading, SourceID, SourceName, begin, end, contents) AS (
+    SELECT NULL, InitialText.id, NULL, "", InitialSource.id, InitialSource.name, 0, 0, InitialText.contents
+    FROM orihime_text AS InitialText
+    LEFT JOIN orihime_source AS InitialSource ON InitialSource.id = InitialText.source_id
+    WHERE InitialText.id = %s
     UNION ALL
-    SELECT orihime_word.definition_id,
-           WordInContext.id,
-           orihime_word.reading,
-           orihime_wordrelation.begin,
-           orihime_wordrelation.end,
-           destination.contents
-    FROM orihime_text AS source,
-         WordInContext
-    INNER JOIN orihime_wordrelation ON orihime_wordrelation.text_id = source.id
-    INNER JOIN orihime_word ON orihime_word.id = orihime_wordrelation.word_id
-    INNER JOIN orihime_text AS destination ON destination.id = orihime_word.definition_id
-    WHERE source.id = WordInContext.id
+    SELECT ParentText.id,
+           ChildText.id,
+           ChildWord.id,
+           ChildWord.reading,
+           Source.id,
+           Source.name,
+           Relation.begin,
+           Relation.end,
+           ChildText.contents
+    FROM WordInContext AS ParentWIC
+    INNER JOIN orihime_text         AS ParentText ON ParentText.id    = ParentWIC.ChildTextID
+    INNER JOIN orihime_word         AS ChildWord  ON ChildWord.id     = Relation.word_id
+    INNER JOIN orihime_text         AS ChildText  ON ChildText.id     = ChildWord.definition_id
+    LEFT  JOIN orihime_source       AS Source     ON Source.id        = ChildText.source_id
+    INNER JOIN orihime_wordrelation AS Relation   ON Relation.text_id = ParentWIC.ChildTextID
   )
 SELECT * from WordInContext;

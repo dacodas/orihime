@@ -38,17 +38,20 @@ def TextTree(id):
     trees = dict()
 
     for result in results:
-        keys = ('id', 'parent_id', 'reading', 'begin', 'end', 'contents')
+
+        keys = ('ParentTextID', 'ChildTextID', 'ChildWordID', 'reading', 'SourceID', 'SourceName', 'begin', 'end', 'contents')
+        # keys = ('id'', 'parent_id', 'reading', 'begin', 'end', 'contents')
 
         tree = {key: value for (key, value) in zip(keys, result)}
         tree['children'] = []
 
-        parent_id = tree['parent_id']
+        parent_id = tree['ParentTextID']
         if parent_id is not None:
 
-            trees[tree['parent_id']]['children'].append(tree)
+            trees[parent_id]['children'].append(tree)
 
-        trees[tree['id']] = tree
+        childTextID = tree['ChildTextID']
+        trees[childTextID] = tree
 
     return trees
 
@@ -61,17 +64,18 @@ def addChildren(root, tree):
 
         logger.debug("Adding child {} to {}".format(child['reading'], words_list))
 
-        item = lxml.html.Element('li', {'class': 'orihime-word'})
+        item = lxml.html.Element('li', {'class': 'orihime-word', 'id': str(child['ChildWordID'])})
         words_list.append(item)
 
         reading = lxml.html.Element('div', {'class': 'reading'})
         reading.text = child['reading']
         item.append(reading)
 
-        definition = lxml.html.Element('div', {'class': 'definition', 'id': str(child['id'])})
+        definition = lxml.html.Element('div', {'class': 'definition', 'id': str(child['ChildTextID'])})
         item.append(definition)
 
         renderDefinition(child['contents'], definition)
+        renderSource(definition, child)
 
         addChildren(item, child)
 
@@ -86,6 +90,7 @@ def _TextTreeView(request, **kwargs):
     root.append(definition)
 
     renderDefinition(trees[id]['contents'], definition)
+    renderSource(definition, trees[id])
 
     addChildren(root, trees[id])
 
@@ -99,6 +104,12 @@ def TextTreeView(request, **kwargs):
     text_tree = _TextTreeView(request, **kwargs).content.decode('utf-8')
 
     return django.shortcuts.render(request, 'orihime/text-tree.html', {"text_tree": text_tree})
+
+def renderSource(root, source):
+
+    source_element = lxml.html.Element('span', {'class': 'source', 'id': str(source['SourceID'])})
+    source_element.text = "Source: {}".format(source['SourceName'])
+    root.append(source_element)
 
 def renderDefinition(string, root):
     """
