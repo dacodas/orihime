@@ -5,9 +5,13 @@ import django.http
 import django.template
 import django.shortcuts
 
-import xml.etree.ElementTree as ET
+import lxml.html
 
 import bleach
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 # https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
 def sqlTextTree(id):
@@ -50,15 +54,22 @@ def TextTree(id):
 
 def addChildren(root, tree):
 
-    words_list = ET.SubElement(root, 'ul', {'class': 'orihime-words'})
+    words_list = lxml.html.Element('ul', {'class': 'orihime-words'})
+    root.append(words_list)
 
     for child in tree['children']:
 
-        print("Adding child {} to {}".format(child['reading'], words_list))
+        logger.debug("Adding child {} to {}".format(child['reading'], words_list))
 
-        item = ET.SubElement(words_list, 'li', {'class': 'orihime-word'})
-        ET.SubElement(item, 'div', {'class': 'reading'}).text = child['reading']
-        definition = ET.SubElement(item, 'div', {'class': 'definition', 'id': str(child['id'])})
+        item = lxml.html.Element('li', {'class': 'orihime-word'})
+        words_list.append(item)
+
+        reading = lxml.html.Element('div', {'class': 'reading'})
+        reading.text = child['reading']
+        item.append(reading)
+
+        definition = lxml.html.Element('div', {'class': 'definition', 'id': str(child['id'])})
+        item.append(definition)
 
         renderDefinition(child['contents'], definition)
 
@@ -70,14 +81,16 @@ def _TextTreeView(request, **kwargs):
     id = kwargs['id']
     trees = TextTree(id)
 
-    root = ET.Element('div', {'id': 'orihime-text-tree'})
-    definition = ET.SubElement(root, 'div', {'class': 'definition', 'id': str(id)})
+    root = lxml.html.Element('div', {'id': 'orihime-text-tree'})
+    definition = lxml.html.Element('div', {'class': 'definition', 'id': str(id)})
+    root.append(definition)
+
     renderDefinition(trees[id]['contents'], definition)
 
     addChildren(root, trees[id])
 
-    string = ET.tostring(root, method='html').decode('utf-8')
-    print(string)
+    string = lxml.html.tostring(root).decode('utf-8')
+    logger.debug(string)
 
     return django.http.HttpResponse(string)
 
@@ -88,25 +101,43 @@ def TextTreeView(request, **kwargs):
     return django.shortcuts.render(request, 'orihime/text-tree.html', {"text_tree": text_tree})
 
 def renderDefinition(string, root):
+    """
+    # The below is no longer a concern... We are now using lxml
+    # instead of html5lib
+    # 
+    # There are different ways we can parse this string using
+    # html5lib.parse. I've elected to go with the default etree
+    # implementation as
 
-    entities_text = '''
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" [
-    <!ENTITY nbsp ' '>
-]>
-'''
+    # 1. It is the default
+    # 2. The rest of the tree code is already using etree
 
-    string_sans_entities = bleach.clean(string)
-    string = entities_text + string.replace('&#13;', '')
+    # The etree implementation appears to use SAX instead of DOM to
+    # process the XML which means it can be online, rather than having
+    # to process the entire document before exposing it to the user.
+    # This is nice, but doesn't have all the bells and whistles of DOM.
+    
+    TODO: Let's think about stripping out tags we don't want...
+    TODO: Let's initialize this custom sanitizer elsewhere in a module
+    TODO: Consider using namespaces for each of the backend to allow
+    easier styling. Classes might also work, but this would be a good
+    test case
+"""
 
-    # Will return either plain text or sanitized HTML
-    try: 
+    ALLOWED_TAGS = bleach.sanitizer.ALLOWED_TAGS + ['p', 'div', 'span']
+    ALLOWED_ATTRIBUTES = {
+        **bleach.sanitizer.ALLOWED_ATTRIBUTES,
+        **{
+            'div': ['class', 'id'],
+            'span': ['class', 'id']
+        }
+    }
 
-        print("Parsing: \n{}".format(string))
-        element = ET.fromstring(string)
-        root.append(element)
- 
-    except ET.ParseError as e:
- 
-        print("Got parse error: {}".format(e))
-        root.text = string_sans_entities
+    clean_string = bleach.clean(
+        string,
+        tags = ALLOWED_TAGS,
+        attributes = ALLOWED_ATTRIBUTES
+    )
+
+    parsed_div = lxml.html.fromstring(clean_string)
+    root.append(parsed_div)
