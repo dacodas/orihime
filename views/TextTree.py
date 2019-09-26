@@ -5,6 +5,8 @@ import django.http
 import django.template
 import django.shortcuts
 
+from django.utils.translation import gettext, gettext_lazy
+
 import lxml.html
 
 import bleach
@@ -108,7 +110,7 @@ def TextTreeView(request, **kwargs):
 def renderSource(root, source):
 
     source_element = lxml.html.Element('span', {'class': 'source', 'id': str(source['SourceID'])})
-    source_element.text = "Source: {}".format(source['SourceName'])
+    source_element.text = "{}: {}".format(gettext("Source"), source['SourceName'])
     root.append(source_element)
 
 def renderDefinition(string, root):

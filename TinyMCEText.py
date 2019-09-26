@@ -1,18 +1,21 @@
 from django import forms
-import django.db.models as models
 from django.contrib.flatpages.models import FlatPage
-from tinymce.widgets import TinyMCE
-
-from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
-
 from django.utils.translation import gettext, gettext_lazy
+from django.shortcuts import render
 
-from orihime.models import Source, Text, Word, WordRelation
+import django.db.models as models
 
-from orihime.serializers import TextSerializer
+import logging
 
 from rest_framework import serializers
+
+from tinymce.widgets import TinyMCE
+
+from orihime.models import Source, Text, Word, WordRelation
+from orihime.serializers import TextSerializer
+
+logger = logging.getLogger(__name__)
 
 class SourceModelChoiceField(forms.ModelChoiceField):
 
@@ -49,9 +52,11 @@ def TinyMCETextView(request):
 
         if form.is_valid():
 
+            # TODO: Better understand the clean method on fields and
+            # clean this bit up if it makes better sense to
             serialize_data = {
                 'user': request.user.email,
-                'source': form.fields['source'].clean(request.POST['source']),
+                'source': form.fields['source'].clean(request.POST['source']).name,
                 'contents': form.fields['contents'].clean(request.POST['contents'])
                 }
                 

@@ -1,18 +1,18 @@
+{% extends "orihime/base.html" %}
+
 {% load static %}
 {% load i18n %}
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
+{% block head %}
 <title>{% trans "Orihime—Add text" %}</title>
 <script src="{% static "js/tinymce/js/tinymce/tinymce.min.js" %}" referrerpolicy="origin"></script>
 <script>tinymce.init({entity_encoding: "raw", selector:'textarea', plugins: 'code'/* , toolbar: 'code' */, menubar: 'tools'});</script>
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
     <form method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="{% trans "Submit" %}">
     </form>
-</body>
-</html>
+{% endblock %}
