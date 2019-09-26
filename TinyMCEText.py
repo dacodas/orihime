@@ -6,6 +6,8 @@ from tinymce.widgets import TinyMCE
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
 
+from django.utils.translation import gettext, gettext_lazy
+
 from orihime.models import Source, Text, Word, WordRelation
 
 from orihime.serializers import TextSerializer
@@ -19,11 +21,17 @@ class SourceModelChoiceField(forms.ModelChoiceField):
 
 class TinyMCETextForm(forms.ModelForm):
 
-    contents = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}))
+    contents = \
+        forms.CharField(
+            widget=TinyMCE(attrs={'cols': 80,
+                                  'rows': 30}),
+            label=gettext_lazy("contents"))
+
     source = SourceModelChoiceField(queryset=Source.objects.all(),
                                     required=False,
                                     empty_label="",
-                                    to_field_name="name")
+                                    to_field_name="name",
+                                    label=gettext_lazy("source"))
 
     class Meta:
         model = Text

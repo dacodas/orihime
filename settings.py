@@ -32,6 +32,8 @@ LOGIN_REDIRECT_URL = '/text/'
 
 STATIC_URL = '/static/'
 
+LOCALE_PATHS = ( '/var/lib/orihime-django/locale', )
+
 ACCOUNT_ACTIVATION_DAYS = 7
 
 REST_FRAMEWORK = {
@@ -70,7 +72,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.locale.LocaleMiddleware'
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
