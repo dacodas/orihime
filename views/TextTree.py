@@ -13,6 +13,8 @@ import bleach
 
 import logging
 
+import orihime.OrihimeBleachCleaner
+
 logger = logging.getLogger(__name__)
 
 # https://stackoverflow.com/questions/4048151/what-are-the-options-for-storing-hierarchical-data-in-a-relational-database
@@ -137,20 +139,8 @@ def renderDefinition(string, root):
     test case
 """
 
-    ALLOWED_TAGS = bleach.sanitizer.ALLOWED_TAGS + ['p', 'div', 'span']
-    ALLOWED_ATTRIBUTES = {
-        **bleach.sanitizer.ALLOWED_ATTRIBUTES,
-        **{
-            'div': ['class', 'id'],
-            'span': ['class', 'id']
-        }
-    }
-
-    clean_string = bleach.clean(
-        string,
-        tags = ALLOWED_TAGS,
-        attributes = ALLOWED_ATTRIBUTES
-    )
+    cleaner = orihime.OrihimeBleachCleaner.Cleaner()
+    clean_string = cleaner.clean(string)
 
     parsed_div = lxml.html.fromstring(clean_string)
     root.append(parsed_div)

@@ -54,9 +54,13 @@ def TinyMCETextView(request):
 
             # TODO: Better understand the clean method on fields and
             # clean this bit up if it makes better sense to
+
+            source_object = form.fields['source'].clean(request.POST['source'])
+            source_name = source_object.name if source_object is not None else None
+
             serialize_data = {
                 'user': request.user.email,
-                'source': form.fields['source'].clean(request.POST['source']).name,
+                'source': source_name,
                 'contents': form.fields['contents'].clean(request.POST['contents'])
                 }
                 

@@ -2,8 +2,10 @@ import logging
 import requests
 import django
 import django.http
+import bleach
 
 import lxml.etree
+import lxml.html
 
 import orihime.settings
 
@@ -25,9 +27,27 @@ def search_larousse(request, **kwargs):
         "https://larousse.fr/dictionnaires/francais/{}"
         .format(word))
 
-    root = lxml.etree.HTML(response.content)
+    parsed_response = lxml.etree.HTML(response.content)
+    first_definition = parsed_response.xpath("//ul[@class='Definitions']")[0]
+    serialized_first_definition = lxml.etree.tostring(first_definition, encoding='utf-8').decode('utf-8')
 
-    # This needs sanitization
-    serialized_html = lxml.etree.tostring(root.xpath("//ul[@class='Definitions']")[0], encoding='utf-8').decode('utf-8')
+    cleaner = orihime.OrihimeBleachCleaner.Cleaner()
+    sanitized_definition = cleaner.clean(serialized_first_definition)
 
-    return django.http.HttpResponse(content = serialized_html)
+    parsed_sanitized_definition = lxml.html.fromstring(sanitized_definition)
+
+    item = lxml.etree.Element('li')
+
+    header = lxml.etree.Element('h1')
+    header.text = word
+
+    item.append(header)
+
+    definition = lxml.etree.Element('div', {'class': 'definition'})
+    definition.append(parsed_sanitized_definition)
+
+    item.append(definition)
+
+    serialized_item = lxml.etree.tostring(item, encoding='utf-8').decode('utf-8')
+
+    return django.http.HttpResponse(content = serialized_item)
