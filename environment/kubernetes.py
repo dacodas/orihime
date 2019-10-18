@@ -17,6 +17,7 @@ hostnames = list(itertools.accumulate(
 
 hostnames = hostnames + [
     "orihime-{}.dacodastrack.com".format(release),
+    "testserver",
     "localhost"
     ]
 
