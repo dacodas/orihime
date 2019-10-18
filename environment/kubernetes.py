@@ -15,7 +15,10 @@ hostnames = list(itertools.accumulate(
     lambda x, y: '{}.{}'.format(x, y)
 ))
 
-hostnames = hostnames + ["orihime-{}.dacodastrack.com".format(release)]
+hostnames = hostnames + [
+    "orihime-{}.dacodastrack.com".format(release),
+    "localhost"
+    ]
 
 DEBUG = True
 SECRET_KEY = os.environ['SECRET_KEY']

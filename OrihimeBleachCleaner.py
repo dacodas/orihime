@@ -15,7 +15,7 @@ class Cleaner(bleach.sanitizer.Cleaner):
         new_kwargs = {
             **kwargs,
             **{
-                'tags': bleach.sanitizer.ALLOWED_TAGS + ['p', 'div', 'span'],
+                'tags': bleach.sanitizer.ALLOWED_TAGS + ['p', 'div', 'span', 'br', 'ruby', 'rt'],
                 'attributes': attributes
             }
         }
