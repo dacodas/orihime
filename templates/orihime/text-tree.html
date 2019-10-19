@@ -15,12 +15,14 @@
             {% endautoescape %}
         </div>
 
+{% if user.is_authenticated %}
         <div id="add-button">+</div>
+{% endif %}
 
         <div id="backend-selector">
             <select>
-                <option value="goo">goo辞書</option>
-                <option value="larousse">Larousse</option>
+                <option>goo辞書</option>
+                <option>Larousse</option>
             </select>
         </div>
 

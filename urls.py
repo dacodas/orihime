@@ -32,9 +32,8 @@ urlpatterns = [
     path('_text-tree/<int:id>', orihime.views.TextTree._TextTreeView, name="orihime-_text-tree"),
     path('_word-relations/', orihime.views.WordRelationCreateWithIntermediaries.WordRelationCreateWithIntermediaries, name="orihime-_words-relations"),
 
-    path('search/<str:word>', orihime.views.search.search_larousse, name="orihime-search"),
-    path('search/larousse/<str:word>', orihime.views.search.search_larousse, name="orihime-search-larousse"),
-    path('search/goo/<str:word>', orihime.views.search.search_goo, name="orihime-search-goo"),
+    path('search/Larousse/<str:word>', orihime.views.search.search_larousse, name="orihime-search-larousse"),
+    path('search/goo辞書/<str:word>', orihime.views.search.search_goo, name="orihime-search-goo"),
 
     # oauth testing
     path('oauth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
